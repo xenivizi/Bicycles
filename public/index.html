@@ -1,0 +1,141 @@
+<html>
+<head>
+<title>Kerékpárok</title>
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+<link href="css/simple-sidebar.css" rel="stylesheet" type="text/css">
+<link href="animations.css" rel="stylesheet" type="text/css">
+<script src="js/bootstrap.min.js"></script>
+<script src="js/angular.min.js"></script>
+<script src="js/jquery.js"></script>
+<meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+</head>
+
+<body ng-app="bicycleManager" ng-controller="menuCtrl">
+
+ <div id="wrapper" style="background-image:url('img/backgroundpic.jpg')">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper" style="background-image:url('img/IMG_20170422_224633.jpg')">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#" ng-click="homePage()">Kerékpár-tár</a>
+                </li>
+                <li>
+                    <a href="#" ng-click="addBicycle()">Kerékpár hozzáadása</a>
+                </li>
+                <li>
+                    <a href="#" ng-click="listBicycles()">Összes kerékpár</a>
+                </li>
+            </ul>
+        </div>
+
+<div id="page-content-wrapper">
+<div class="container-fluid">
+ <div class="row">
+  <div class="col-lg-12" id="addBicycleForm">
+  <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Menü</a><br>
+	<div class="panel panel-default">
+	<div class="panel-heading">Új kerékpár hozzáadása</div>
+	<div class="panel-body">
+		<form id="bicycleForm">
+			Név: <input name="name" type="text"/><br/>
+			Típus: <input name="type" type="text"/><br/>
+			Ár: <input name="price" type="text"/><br/>
+			<button type="button" class="btn btn-success" ng-click="sendForm()">OK</button>
+		</form>
+	</div>
+	</div>
+	<div class="col-lg-12" id="bicycleList">
+	<a href="#menu-toggle" class="btn btn-default" id="menu-toggle2">Menü</a><br>
+	<div class="panel panel-default">
+	<div class="panel-heading">Összes kerékpár</div>
+	<div class="panel-body">
+	<table class="table table-hover">
+		<tr><th>Név</th><th>Típus</th><th>Ár</th></tr>
+		<tr ng-repeat="bicycle in bicycles">
+			<td>{{bicycle.name}}</td>
+			<td>{{bicycle.type}}</td>
+			<td>{{bicycle.price}}</td>
+			<td><button type="button" class="btn btn-default btn-sm" ng-click="deleteBicycle(bicycle.name)">
+          <span class="glyphicon glyphicon-remove"></span> Törlés 
+        </button></td>
+		</tr> 
+	</table>
+	</div>
+	</div>
+	</div>
+	<div class="col-lg-12" id="homePage">
+		<p></p>
+	<a href="#menu-toggle" class="btn btn-default" id="menu-toggle3">Menü</a><br>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+$("#menu-toggle").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
+});
+</script>
+<script>
+$("#menu-toggle2").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
+});
+</script>
+<script>
+$("#menu-toggle3").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
+});
+</script>
+
+<script>
+var bicycleListingModule = angular.module("bicycleList",[]);
+var bicycleManagementModule = angular.module("bicycleManager",[]);
+var contentVar = 0;
+bicycleManagementModule.controller("menuCtrl",function($scope,$http){
+	$scope.listBicycles = function(){
+	
+		document.getElementById("addBicycleForm").style.visibility = "hidden";
+		document.getElementById("bicycleList").style.visibility = "visible";
+		document.getElementById("homePage").style.visibility = "hidden";
+		$http.get('/bicycles').then(function(resp){
+			$scope.bicycles = resp.data;		
+
+		});
+	};
+		$scope.homePage = function(){
+		document.getElementById("addBicycleForm").style.visibility = "hidden";
+		document.getElementById("bicycleList").style.visibility = "hidden";
+		document.getElementById("homePage").style.visibility = "visible";
+	};
+	$scope.addBicycle = function(){
+		document.getElementById("addBicycleForm").style.visibility = "visible";
+		document.getElementById("bicycleList").style.visibility = "hidden";
+		document.getElementById("homePage").style.visibility = "hidden";
+	};
+	$scope.sendForm = function(){
+		var form = document.getElementById('bicycleForm');
+		var bicycle = new Object();
+		bicycle.name = form['name'].value;
+		bicycle.type = form['type'].value;
+		bicycle.price = form['price'].value;
+		console.log(JSON.stringify(bicycle));
+		$http.post('/addBicycle',JSON.stringify(bicycle)).success(function(){
+			alert('success');
+		});
+		$scope.listBicycles();
+	};
+	$scope.deleteBicycle = function(name){
+		$http.get('/deleteBicycle?name=' + name);
+		$scope.listBicycles();
+	};
+	window.onload = $scope.homePage();
+});	
+</script>
+</body>
+</html>
